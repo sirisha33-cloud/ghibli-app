@@ -5,14 +5,13 @@ from PIL import Image
 import torch
 
 # ===== LOGIN SETUP =====
-names = ['Siri', 'Demo User']
-usernames = ['siri123', 'demo']
+names = ['Siri', 'Guest']
+usernames = ['siri123', 'guest_user']
 
 # Pre-hashed passwords (abc123, demo123)
 hashed_pw = [
-    '$2b$12$KIXU2ZRzVj1PaZJ2Q0OE1ugNvwfvEkT5YQetbZq8zhNbyV7NHF8Xu',  # abc123
-    '$2b$12$zXh7B7Xp5ak8nF5guE/JauWKHZwSVhh.zOKO.QnA9LQv6mvHjL0fy'   # demo123
-]
+    sirish97@3 => $2b$12$Cut8lVQeKRbuA826F1odzu0BAwfcRTLoYNr3pUsBSgAhlV.O0Yguu
+sirisH3@97 => $2b$12$5wNTCvCRLD/GXvIlGcAMo.JwOnsBZqhpqnPqipygeqtjatdwZsG4e
 
 # Credentials dict
 credentials = {
