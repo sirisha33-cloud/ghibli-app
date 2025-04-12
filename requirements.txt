@@ -1,8 +1,8 @@
 streamlit
-torch
-torchvision
+streamlit-authenticator
 diffusers
 transformers
-safetensors
 Pillow
+torch
+safetensors
 accelerate
