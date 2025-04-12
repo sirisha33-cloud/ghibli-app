@@ -1,8 +1,8 @@
 streamlit
-streamlit-authenticator
+streamlit-authenticator==0.2.2
 diffusers
 transformers
-Pillow
 torch
+Pillow
 safetensors
 accelerate
