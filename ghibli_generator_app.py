@@ -10,8 +10,8 @@ usernames = ['siri123', 'guest_user']
 
 # Pre-hashed passwords (abc123, demo123)
 hashed_pw = [
-   sirish97@3 => $2b$12$Cut8lVQeKRbuA826F1odzu0BAwfcRTLoYNr3pUsBSgAhlV.O0Yguu
-sirisH3@97 => $2b$12$5wNTCvCRLD/GXvIlGcAMo.JwOnsBZqhpqnPqipygeqtjatdwZsG4e
+   sirish97@3 => $2b$12$GHIjwfBiUGZjZ/Pz/SZYT.TMIqjD70AR82.HYTN.gM3e39wl5umUW
+sirisH3@97 => $2b$12$BK155do45Lk7TDjII93imuxvDWfYj.pDhLwfpqRljub8vRAMDgoJa
 # Credentials dict
 credentials = {
     "usernames": {
