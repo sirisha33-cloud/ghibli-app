@@ -1,61 +1,82 @@
+import streamlit_authenticator as stauth
 import streamlit as st
-from diffusers import StableDiffusionImg2ImgPipeline
-from PIL import Image
+from diffusers import StableDiffusionPipeline
 import torch
-import io
 
-st.set_page_config(page_title="Ghibli Image Generator 🎨", layout="centered")
-st.title("✨ AI Art Generator — Ghibli & More")
-st.markdown("Create magical artwork from a prompt or photo in styles like Ghibli, Pixar, Watercolor, and more!")
+# ===== LOGIN SETUP =====
+names = ['Siri', 'Demo User']
+usernames = ['siri123', 'demo']
+passwords = ['abc123', 'demo123']
 
-# 🎨 Style selector
-style = st.selectbox("Choose a style:", [
-    "Studio Ghibli",
-    "Pixar",
-    "Cyberpunk",
-    "Watercolor",
-    "Fantasy"
-])
+hashed_pw = stauth.Hasher(passwords).generate()
 
-style_prompts = {
-    "Studio Ghibli": "in the style of Studio Ghibli",
-    "Pixar": "in the style of Pixar animation",
-    "Cyberpunk": "in a futuristic neon cyberpunk city",
-    "Watercolor": "in dreamy watercolor painting style",
-    "Fantasy": "in epic high-fantasy concept art style"
-}
-
-# 🖊️ Prompt input
-prompt_input = st.text_input("Describe your scene:",
-    f"a cozy village in the mountains {style_prompts[style]}"
+authenticator = stauth.Authenticate(
+    names, usernames, hashed_pw,
+    'ghibli_login', 'abcdef', cookie_expiry_days=1
 )
 
-# 🖼️ Image upload (optional)
-uploaded_img = st.file_uploader("Upload an image (optional):", type=["jpg", "jpeg", "png"])
+name, auth_status, username = authenticator.login('Login', 'main')
 
-@st.cache_resource(show_spinner=True)
-def load_model():
-    pipe = StableDiffusionImg2ImgPipeline.from_pretrained(
-        "CompVis/stable-diffusion-v1-4",
-        torch_dtype=torch.float32
-    ).to("cpu")
-    return pipe
+if auth_status == False:
+    st.error("❌ Incorrect username or password")
+    st.stop()
+elif auth_status == None:
+    st.warning("👋 Please enter your credentials")
+    st.stop()
+elif auth_status:
+    authenticator.logout("Logout", "sidebar")
+    st.sidebar.success(f"Welcome, {name} 👋")
 
-pipe = load_model()
+    # ===== GHIBLI APP =====
+    st.set_page_config(page_title="Ghibli Image Generator 🎨", layout="centered")
+    st.title("✨ Studio Ghibli-Style Image Generator")
+    st.markdown("Generate magical images in the soft, whimsical style of Studio Ghibli!")
 
-if st.button("🎨 Generate Image"):
-    with st.spinner("Creating your artwork..."):
-        init_image = None
-        if uploaded_img:
-            init_image = Image.open(uploaded_img).convert("RGB").resize((512, 512))
-        else:
-            # If no image, use blank image as base
-            init_image = Image.new("RGB", (512, 512), (255, 255, 255))
+    user_prompt = st.text_input("Enter your prompt:",
+        "a magical forest with a cozy house, Studio Ghibli style")
 
-        image = pipe(prompt=prompt_input, image=init_image, strength=0.75, guidance_scale=7.5).images[0]
-        st.image(image, caption=f"{style} Style Result", use_column_width=True)
+    # == FREE LIMIT CHECK ==
+    if "gen_count" not in st.session_state:
+        st.session_state.gen_count = 0
 
-        # 💾 Download button
-        buf = io.BytesIO()
-        image.save(buf, format="PNG")
-        st.download_button("Download Image", data=buf.getvalue(), file_name="ai_art.png", mime="image/png")
+    # Simulate: only 'siri123' is a paying user
+    is_paid_user = username == "siri123"
+
+    if not is_paid_user and st.session_state.gen_count >= 3:
+        st.warning("🚫 You've reached your free limit.")
+        st.markdown("[🔓 Buy Unlimited Access](https://buy.stripe.com/test_6oE6rb83p3lv8Oc3cc)")
+        st.stop()
+
+    # == MODEL LOADER ==
+    def load_model():
+        pipe = StableDiffusionPipeline.from_pretrained(
+            "CompVis/stable-diffusion-v1-4",
+            torch_dtype=torch.float32
+        ).to("cpu")
+        return pipe
+
+    pipe = load_model()
+
+    # == GENERATE IMAGE ==
+    if st.button("Generate Image"):
+        with st.spinner("Creating magic... 🧚‍♀️"):
+            image = pipe(user_prompt).images[0]
+            st.image(image, caption="Your Ghibli-style masterpiece", use_column_width=True)
+
+            # Save for download
+            image.save("generated_ghibli.png")
+            with open("generated_ghibli.png", "rb") as f:
+                st.download_button(
+                    label="📥 Download Image",
+                    data=f,
+                    file_name="ghibli_image.png",
+                    mime="image/png"
+                )
+
+            # Track usage for free users
+            if not is_paid_user:
+                st.session_state.gen_count += 1
+
+            st.success("Done! You can download or regenerate.")
+
+
